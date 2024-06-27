@@ -52,7 +52,6 @@ async def main():
     task1.cancel()
     task2.cancel()
 
-
 async def do_something(event: asyncio.Event):
     while True:
         await event.wait()

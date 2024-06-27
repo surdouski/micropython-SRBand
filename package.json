@@ -1,0 +1,7 @@
+{
+  "urls": [
+    ["sr_band.py", "github:surdouski/micropython-SRBand/sr_band.py"]
+  ],
+  "deps": [],
+  "version": "0.1"
+}

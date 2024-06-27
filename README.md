@@ -1,0 +1,103 @@
+# SRBand
+
+The `SRBand` class is used to monitor a value within a specified range, triggering events when the value crosses high and low thresholds.
+
+## Installation
+
+You can install SRBand from the REPL with mip.
+```python
+# micropython REPL
+import mip
+mip.install("github:surdouski/micropython-SRBand")
+```
+
+Alternatively, you can install it by using mpremote if you don't have network connectivity on device.
+```
+$ mpremote mip install github:surdouski/micropython-SRBand
+```
+
+## Usage
+
+Here is an example of how to use the `SRBand` class:
+
+```python
+import asyncio
+from sr_band import SRBand
+
+async def main():
+    # Initialize the SRBand with target, high, and low values
+    band = SRBand(target=50, high=70, low=30)
+    
+    # Setup some tasks to trigger when the event is set
+    # Don't forget to clear your events inside the tasks
+    task1 = asyncio.create_task(do_something(sr.fall_event))
+    task2 = asyncio.create_task(do_something(sr.rise_event))
+    
+    # Update the value and check events
+    band.update(75)  # This should trigger the fall_event
+    await asyncio.sleep(1)
+    
+    band.update(25)  # This should trigger the rise_event
+    await asyncio.sleep(1)
+
+async def do_something(event: asyncio.Event):
+    while True:
+        await event.wait()
+        event.clear()
+        # do stuff here
+        
+# Run the async main function
+asyncio.run(main())
+```
+
+### SRBand Class
+
+#### `SRBand(target: float, high: float, low: float)`
+Initializes an `SRBand` object with specified target, high, and low thresholds.
+
+**Parameters:**
+- `target` (float): The target value.
+- `high` (float): The high threshold.
+- `low` (float): The low threshold.
+
+**Raises:**
+- `SRBandException`: If the provided arguments do not satisfy `low < target < high`.
+
+#### `update(new_value: float) -> None`
+Updates the current value and triggers events if thresholds are crossed.
+
+**Parameters:**
+- `new_value` (float): The new value to update.
+
+### SRBandException Class
+
+Custom exception for the `SRBand` class.
+
+## Tests
+
+To run tests, do the following.
+```
+# setup local lib for mip install files
+$ mkdir lib
+
+# start micropython REPL with local lib volume
+$ docker run -it --rm -v $(echo $PWD)/lib:/root/.micropython/lib micropython/unix
+
+# in the micropython REPL that comes up from previous command
+$ import mip
+$ mip.install("github:surdouski/micropython-SRBand")
+# then use ctrl-d to exit REPL
+
+# build the image using local Dockerfile (appends the test.py to the CMD to run tests instead of entering REPL)
+$ docker build -t micropython/unix-test:latest -f Dockerfile .
+
+# run the new image with your local and local lib as volumes
+$ docker run --rm -v $(echo $PWD):/code -v $(echo $PWD)/lib:/root/.micropython/lib  micropython/unix-test
+```
+
+If you want to edit tests, you only need to run the last command again to see results.
+
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.

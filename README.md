@@ -33,12 +33,25 @@ async def main():
     task1 = asyncio.create_task(do_something(sr.fall_event))
     task2 = asyncio.create_task(do_something(sr.rise_event))
     
-    # Update the value and check events
-    band.update(75)  # This should trigger the fall_event
+    # This should trigger the fall_event 
+    band.update(75)  # internal status: SET_FALL
     await asyncio.sleep(1)
     
     band.update(25)  # This should trigger the rise_event
-    await asyncio.sleep(1)
+    await asyncio.sleep(1)  # internal status: SET_RISE
+
+    # These will trigger 3 more rise_event:    
+    band.update(29)  # Successive updates after a triggered;        internal status: SET_RISE
+    band.update(31)  # event, but while still below the;            internal status: SET_RISE
+    band.update(49)  # target, will continue triggering that event. internal status: SET_RISE
+    
+    # No event is triggered here, as it has passed (or is equal to) the reset point.
+    band.update(51)  # internal status: IDLE
+    
+    # cleanup tasks
+    task1.cancel()
+    task2.cancel()
+
 
 async def do_something(event: asyncio.Event):
     while True:

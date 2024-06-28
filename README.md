@@ -90,7 +90,7 @@ Custom exception for the `SRBand` class.
 To run tests, do the following.
 ```
 # install unittest, mounting the volume locally
-$ docker run -it --rm -v $(PWD)/lib:/root/.micropython/lib micropython/unix micropython -m mip install unittest
+$ docker run --rm -v $(PWD)/lib:/root/.micropython/lib micropython/unix micropython -m mip install unittest
 
 # run the test, using the mounted volume for the unittest deps
 $ docker run --rm -v $(PWD):/code -v $(PWD)/lib:/root/.micropython/lib micropython/unix micropython test.py

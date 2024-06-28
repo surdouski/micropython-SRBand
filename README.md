@@ -89,22 +89,11 @@ Custom exception for the `SRBand` class.
 
 To run tests, do the following.
 ```
-# setup local lib for mip install files
-$ mkdir lib
+# install unittest, mounting the volume locally
+$ docker run -it --rm -v $(PWD)/lib:/root/.micropython/lib micropython/unix micropython -m mip install unittest
 
-# start micropython REPL with local lib volume
-$ docker run -it --rm -v $(echo $PWD)/lib:/root/.micropython/lib micropython/unix
-
-# in the micropython REPL that comes up from previous command
-$ import mip
-$ mip.install("github:surdouski/micropython-SRBand")
-# then use ctrl-d to exit REPL
-
-# build the image using local Dockerfile (appends the test.py to the CMD to run tests instead of entering REPL)
-$ docker build -t micropython/unix-test:latest -f Dockerfile .
-
-# run the new image with your local and local lib as volumes
-$ docker run --rm -v $(echo $PWD):/code -v $(echo $PWD)/lib:/root/.micropython/lib  micropython/unix-test
+# run the test, using the mounted volume for the unittest deps
+$ docker run --rm -v $(PWD):/code -v $(PWD)/lib:/root/.micropython/lib micropython/unix micropython test.py
 ```
 
 If you want to edit tests, you only need to run the last command again to see results.

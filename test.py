@@ -8,17 +8,33 @@ class TestSRBand(unittest.TestCase):
         with self.assertRaises(SRBandException):
             SRBand(2.0, 1.9, 1.6)
 
+        with self.assertRaises(SRBandException):
+            sr = SRBand(2.0, 2.4, 1.6)
+            sr.update_high(1.9)
+
     def test_init_high_equal_to_target(self):
         with self.assertRaises(SRBandException):
             SRBand(2.0, 2.0, 1.6)
+
+            with self.assertRaises(SRBandException):
+                sr = SRBand(2.0, 2.4, 1.6)
+                sr.update_high(2.0)
 
     def test_init_low_more_than_target(self):
         with self.assertRaises(SRBandException):
             SRBand(2.0, 2.4, 2.1)
 
+        with self.assertRaises(SRBandException):
+            sr = SRBand(2.0, 2.4, 1.6)
+            sr.update_low(2.1)
+
     def test_init_low_equal_to_target(self):
         with self.assertRaises(SRBandException):
             SRBand(2.0, 2.4, 2.0)
+
+        with self.assertRaises(SRBandException):
+            sr = SRBand(2.0, 2.4, 1.6)
+            sr.update_low(2.0)
 
     def test_set_reset_high(self):
         async def run_test():
@@ -28,18 +44,18 @@ class TestSRBand(unittest.TestCase):
                 update_status_func(event_counter, sr.fall_event)
             )
 
-            sr.update(2.6)
+            sr.run(2.6)
             assert_set_fall(sr)
             await asyncio.sleep(0)
             assert_event_count(event_counter, 1)
 
-            sr.update(2.1)
+            sr.run(2.1)
             assert_set_fall(sr)
 
             await asyncio.sleep(0)
             assert_event_count(event_counter, 2)
 
-            sr.update(2.0)  # should trigger reset
+            sr.run(2.0)  # should trigger reset
             assert_idle(sr)
 
             fall_task.cancel()
@@ -54,18 +70,18 @@ class TestSRBand(unittest.TestCase):
                 update_status_func(event_counter, sr.rise_event)
             )
 
-            sr.update(1.5)
+            sr.run(1.5)
             assert_set_rise(sr)
             await asyncio.sleep(0)
             assert_event_count(event_counter, 1)
 
-            sr.update(1.7)
+            sr.run(1.7)
             assert_set_rise(sr)
 
             await asyncio.sleep(0)
             assert_event_count(event_counter, 2)
 
-            sr.update(2.1)  # should trigger reset
+            sr.run(2.1)  # should trigger reset
             assert_idle(sr)
 
             fall_task.cancel()
@@ -84,19 +100,19 @@ class TestSRBand(unittest.TestCase):
                 update_status_func(rise_event_counter, sr.rise_event)
             )
 
-            sr.update(2.0)
+            sr.run(2.0)
             assert_idle(sr)
             await asyncio.sleep(0)
             assert_event_count(fall_event_counter, 0)
             assert_event_count(rise_event_counter, 0)
 
-            sr.update(1.5)
+            sr.run(1.5)
             assert_set_rise(sr)
             await asyncio.sleep(0)
             assert_event_count(fall_event_counter, 0)
             assert_event_count(rise_event_counter, 1)
 
-            sr.update(2.5)
+            sr.run(2.5)
             assert_set_fall(sr)
             await asyncio.sleep(0)
             assert_event_count(fall_event_counter, 1)

@@ -36,9 +36,9 @@ class SRBand:
         self.fall_event: asyncio.Event = asyncio.Event()
         self.rise_event: asyncio.Event = asyncio.Event()
 
-    def update(self, new_value: float) -> None:
+    def run(self, new_value: float, trigger_events: bool = True) -> None:
         """
-        Update the current value and trigger events if thresholds are crossed.
+        Run the current value and trigger events if thresholds are crossed.
 
         Args:
             new_value (float): The new value to update.
@@ -55,7 +55,30 @@ class SRBand:
         elif self.status == SRBand.Status.SET_RISE and self.value >= self._target:
             self.status = SRBand.Status.IDLE
 
-        if self.status == SRBand.Status.SET_FALL:
-            self.fall_event.set()
-        elif self.status == SRBand.Status.SET_RISE:
-            self.rise_event.set()
+        if trigger_events:
+            if self.status == SRBand.Status.SET_FALL:
+                self.fall_event.set()
+            elif self.status == SRBand.Status.SET_RISE:
+                self.rise_event.set()
+
+    def update_high(self, new_high: float) -> None:
+        if not self._low < self._target < new_high:
+            raise SRBandException("Args must abide by rule of: low < target < high.")
+        self._high = new_high
+        if self.value:
+            self.run(self.value, trigger_events=False)
+
+    def update_low(self, new_low: float) -> None:
+        if not new_low < self._target < self._high:
+            raise SRBandException("Args must abide by rule of: low < target < high.")
+        self._low = new_low
+        if self.value:
+            self.run(self.value, trigger_events=False)
+
+    def update_target(self, new_target: float) -> None:
+        if not self._low < new_target < self._high:
+            raise SRBandException("Args must abide by rule of: low < target < high.")
+        self._target = new_target
+        if self.value:
+            self.run(self.value, trigger_events=False)
+

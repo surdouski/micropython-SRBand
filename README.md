@@ -24,40 +24,43 @@ Here is an example of how to use the `SRBand` class:
 import asyncio
 from sr_band import SRBand
 
+
 async def main():
     # Initialize the SRBand with target, high, and low values
     band = SRBand(target=50, high=70, low=30)
-    
+
     # Setup some tasks to trigger when the event is set
     # Don't forget to clear your events inside the tasks
-    task1 = asyncio.create_task(do_something(sr.fall_event))
-    task2 = asyncio.create_task(do_something(sr.rise_event))
-    
+    task1 = asyncio.create_task(do_something(band.fall_event))
+    task2 = asyncio.create_task(do_something(band.rise_event))
+
     # This should trigger the fall_event 
-    band.update(75)  # internal status: SET_FALL
+    band.run(75)  # internal status: SET_FALL
     await asyncio.sleep(1)
-    
-    band.update(25)  # This should trigger the rise_event
+
+    band.run(25)  # This should trigger the rise_event
     await asyncio.sleep(1)  # internal status: SET_RISE
 
     # These will trigger 3 more rise_event:    
-    band.update(29)  # Successive updates after a triggered;        internal status: SET_RISE
-    band.update(31)  # event, but while still below the;            internal status: SET_RISE
-    band.update(49)  # target, will continue triggering that event. internal status: SET_RISE
-    
+    band.run(29)  # Successive updates after a triggered;        internal status: SET_RISE
+    band.run(31)  # event, but while still below the;            internal status: SET_RISE
+    band.run(49)  # target, will continue triggering that event. internal status: SET_RISE
+
     # No event is triggered here, as it has passed (or is equal to) the reset point.
-    band.update(51)  # internal status: IDLE
-    
+    band.run(51)  # internal status: IDLE
+
     # cleanup tasks
     task1.cancel()
     task2.cancel()
+
 
 async def do_something(event: asyncio.Event):
     while True:
         await event.wait()
         event.clear()
         # do stuff here
-        
+
+
 # Run the async main function
 asyncio.run(main())
 ```
@@ -75,11 +78,21 @@ Initializes an `SRBand` object with specified target, high, and low thresholds.
 **Raises:**
 - `SRBandException`: If the provided arguments do not satisfy `low < target < high`.
 
-#### `update(new_value: float) -> None`
-Updates the current value and triggers events if thresholds are crossed.
+#### `run(new_value: float, trigger_events: True) -> None`
+Runs the current value and triggers events if thresholds are crossed.
 
 **Parameters:**
 - `new_value` (float): The new value to update.
+- `trigger_events` (bool): If events should be set.
+
+#### `update_high(new_high: float) -> None`
+Updates the `_high` property, updating the object status; does not trigger events.
+
+#### `update_low(new_low: float) -> None`
+Updates the `_low` property, updating the object status; does not trigger events.
+
+#### `update_target(new_target: float) -> None`
+Updates the `_target` property, updating the object status; does not trigger events.
 
 ### SRBandException Class
 

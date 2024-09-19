@@ -106,7 +106,7 @@ To run tests, do the following.
 $ docker run --rm -v $(pwd)/lib:/root/.micropython/lib micropython/unix micropython -m mip install unittest
 
 # run the test, using the mounted volume for the unittest deps
-$ docker run --rm -v $(pwd):/code -v $(pwd)/lib:/root/.micropython/lib micropython/unix micropython test.py
+$ docker run --rm -v $(pwd):/code -v $(pwd)/lib:/root/.micropython/lib -w /code micropython/unix micropython test.py
 ```
 
 If you want to edit tests, you only need to run the last command again to see results.

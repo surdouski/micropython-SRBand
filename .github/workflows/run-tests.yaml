@@ -20,11 +20,12 @@ jobs:
         run: |
           docker run --rm -v $(pwd)/lib:/root/.micropython/lib $DOCKER_IMAGE micropython -m mip install unittest
 
-      - name: Install dependencies via MIP
-        run: |
-          deps=$(jq -r '.deps[] | "\(.[0])@\(.[1])"' package.json)
-          echo "$deps" | xargs -n 1 -I {} docker run --rm -v $(pwd)/lib:/root/.micropython/lib $DOCKER_IMAGE micropython -m mip install {}
+#      - name: Install dependencies via MIP
+#        run: |
+#          deps=$(jq -r '.deps[] | "\(.[0])@\(.[1])"' package.json)
+#          echo "$deps" | xargs -n 1 -I {} docker run --rm -v $(pwd)/lib:/root/.micropython/lib $DOCKER_IMAGE micropython -m mip install {}
 
       - name: Run tests
         run: |
           docker run --rm -v $(pwd):/code -v $(pwd)/lib:/root/.micropython/lib $DOCKER_IMAGE micropython test.py
+          docker run --rm -v $(pwd):/code -v $(pwd)/lib:/root/.micropython/lib micropython/unix micropython test.py

@@ -5,9 +5,6 @@ on:
     branches:
       - '**' # Trigger on any branch push
 
-env:
-  DOCKER_IMAGE: micropython/unix
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -16,15 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install unittest via MIP
-        run: |
-          docker run --rm -v $(pwd)/lib:/root/.micropython/lib $DOCKER_IMAGE micropython -m mip install unittest
+      - name: Install micropython
+        uses: BrianPugh/install-micropython@v2
+        with:
+          reference: v1.23.0
 
-      - name: Install dependencies via MIP
+      - name: Install unittest
+        run: |
+          micropython -m mip install unittest
+
+      - name: Install deps
         run: |
           deps=$(jq -r '.deps[] | "\(.[0])@\(.[1])"' package.json)
-          echo "$deps" | xargs -n 1 -I {} docker run --rm -v $(pwd)/lib:/root/.micropython/lib $DOCKER_IMAGE micropython -m mip install {}
+          echo "$deps" | xargs -I {} micropython -m mip install {}
 
       - name: Run tests
         run: |
-          docker run --rm -v $(pwd):/code -v $(pwd)/lib:/root/.micropython/lib -w /code $DOCKER_IMAGE micropython test.py
+          micropython test.py
